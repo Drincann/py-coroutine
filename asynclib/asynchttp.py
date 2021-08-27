@@ -14,7 +14,6 @@ def get(*, url, callback):
     def connected():
         selector.unregister(sock.fileno())
         selector.register(sock.fileno(), EVENT_READ, responded)
-        print(f"""GET {urlObj.path if urlObj.path != '' else '/'}{'?' if urlObj.query != '' else '' + urlObj.query} HTTP/1.0\r\n\r\n""")
         sock.send(
             f"""GET {urlObj.path if urlObj.path != '' else '/'}{'?' if urlObj.query != '' else '' + urlObj.query} HTTP/1.0\r\n\r\n"""
             .encode('ascii')
