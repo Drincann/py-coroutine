@@ -3,12 +3,12 @@ from inspect import isgeneratorfunction, isgenerator, isfunction
 
 
 class Future:
-    callbacks: List[Callable[[Any], Any]] = []
-    value: Any = None
-    task: Callable[[Callable[[Any], Any]], Any]
-    state: str = 'pending'
 
     def __init__(self, task=None):
+        self.callbacks: List[Callable[[Any], Any]] = []
+        self.value: Any = None
+        self.task: Callable[[Callable[[Any], Any]], Any]
+        self.state: str = 'pending'
         if isgeneratorfunction(task):
             self.task = task(self.resolve)
         elif isfunction(task):
