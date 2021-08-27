@@ -19,6 +19,7 @@ class Future:
     def resolve(self, value: Any = None):
         if self.state == 'resolved':
             return
+        self.value = value
         self.state = 'resolved'
         for cbk in self.callbacks:
             cbk(self)
