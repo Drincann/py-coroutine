@@ -23,7 +23,7 @@ def loop():
             cbk = eventQueue.getCallback()
             if isgenerator(cbk):
                 __GeneratorExecutor(cbk)
-            elif callable(fn):
+            elif callable(cbk):
                 cbk()
             else:
                 raise TypeError('cbk is not callable or generatable')
