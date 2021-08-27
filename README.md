@@ -29,7 +29,9 @@ js 异步实现参考
 - `asynclib.eventloop.__GeneratorExcutor` 是协程的驱动器, 配合 `Future` 实例对协程进行驱动,
 - `asynclib.Future.Future` 是用来辅助协程驱动器执行协程的类。它有点类似 `Promise`
 
-`asynclib` 暴露了两个接口
+`asynclib` 暴露了三个接口
 
 - `loop` 事件循环入口
 - `asyncRun` 向事件队列中压入一个协程
+- `Future` 异步过程的包装器, 用于挂起协程
+  这是一个类似 Promise 的类, 该类将接收一个回调函数, 并提供一个 `resolve` 参数, 在异步任务完成时调用并传入结果, `GeneratorExcutor` 将会进一步驱动协程恢复并将异步过程的返回值传递到协程挂起位置。
