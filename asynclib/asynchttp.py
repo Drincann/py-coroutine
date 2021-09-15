@@ -41,13 +41,12 @@ def get(*, url, callback):
                 cbk()
             if __stop:
                 break
-
-    Thread(target=loop).start()
+    
     selector.register(sock.fileno(), EVENT_WRITE, connected)
-
     try:
         sock.connect(
             (urlObj.hostname, urlObj.port if urlObj.port != None else 80)
         )
     except BlockingIOError:
         pass
+    Thread(target=loop).start()
