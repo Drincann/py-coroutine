@@ -2,8 +2,8 @@ from queue import Queue
 
 
 class __EventQueue:
-
-    __eventQueue = Queue()
+    def __init__(self) -> None:
+        self.__eventQueue = Queue()
 
     def pushCallback(self, fn):
         self.__eventQueue.put(fn, block=True)
