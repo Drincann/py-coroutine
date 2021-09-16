@@ -2,7 +2,7 @@ import socket
 import urllib.parse
 from selectors import DefaultSelector, EVENT_WRITE, EVENT_READ
 from threading import Thread
-from .eventQueue import eventQueue
+from ..core.eventQueue import eventQueue
 
 
 def get(*, url, callback):

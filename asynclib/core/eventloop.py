@@ -1,7 +1,7 @@
 from inspect import isgenerator
 from selectors import DefaultSelector
 from .eventQueue import eventQueue
-from .Future import Future
+from .model import Future
 
 
 class __GeneratorExecutor:
