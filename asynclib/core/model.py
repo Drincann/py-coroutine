@@ -4,17 +4,12 @@ from inspect import isgeneratorfunction, isfunction
 
 class Future:
 
-    def __init__(self, task=None):
+    def __init__(self, task=lambda resolve: resolve()):
         self.callbacks: List[Callable[[Any], Any]] = []
         self.value: Any = None
-        self.task: Callable[[Callable[[Any], Any]], Any]
         self.state: str = 'pending'
-        if isgeneratorfunction(task):
-            self.task = task(self.resolve)
-        elif isfunction(task):
-            self.task = task
-        else:
-            self.task = lambda resolve: resolve()
+        task(self.resolve)
+            
 
     def resolve(self, value: Any = None):
         if self.state == 'resolved':
@@ -32,7 +27,5 @@ class Future:
         return self
 
     def __iter__(self):
-        if(isfunction(self.task)):
-            self.task(self.resolve)
         yield self
         return self.value
