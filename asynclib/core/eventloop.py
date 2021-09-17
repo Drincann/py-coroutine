@@ -1,4 +1,4 @@
-from inspect import isgenerator
+from inspect import isgenerator, isgeneratorfunction
 from selectors import DefaultSelector
 from .eventQueue import eventQueue
 from .model import Future
@@ -39,10 +39,12 @@ class Loop:
                 cbk = eventQueue.getCallback()
                 if isgenerator(cbk):
                     self.__GeneratorExecutor(cbk)
+                elif isgeneratorfunction(cbk):
+                    self.__GeneratorExecutor(cbk())
                 elif callable(cbk):
                     cbk()
                 else:
-                    raise TypeError('cbk is not callable or generatable')
+                    raise TypeError('cbk is not callable, generator or generatable')
                 if self.__stop is True:
                     eventQueue.clear()
                     return  
