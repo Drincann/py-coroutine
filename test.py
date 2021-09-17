@@ -1,10 +1,11 @@
-from asynclib import loop, Future, asynchttp, asyncfun
+from asynclib.core import Future, asyncfun
+from asynclib.asynchttp import get as asyncget
 
 @asyncfun
 def http():
     responseData = yield from Future(
         lambda resolve:
-            asynchttp.get(
+            asyncget(
                 url='http://gaolihai.cool/doc/README.md',
                 callback=lambda response: resolve(response)
             )
