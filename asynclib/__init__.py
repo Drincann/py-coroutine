@@ -1,1 +1,1 @@
-from .core import loop, eventQueue, asyncRun, Future
+from .core import loop, eventQueue, asyncRun,asyncfun, Future
