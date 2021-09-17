@@ -14,5 +14,3 @@ def http():
 
 for i in range(1):
     http()
-
-loop()
