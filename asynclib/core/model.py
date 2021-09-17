@@ -1,5 +1,5 @@
 from typing import Any, Callable, Sequence, List
-from inspect import isgeneratorfunction, isgenerator, isfunction
+from inspect import isgeneratorfunction, isfunction
 
 
 class Future:

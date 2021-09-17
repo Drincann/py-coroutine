@@ -1,5 +1,4 @@
 from inspect import isgenerator, isgeneratorfunction
-from selectors import DefaultSelector
 from .eventQueue import eventQueue
 from .model import Future
 
