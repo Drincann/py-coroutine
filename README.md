@@ -24,20 +24,13 @@ js 异步实现参考
 
 通过 `Future` 类包装异步过程, 将会辅助 `GeneratorExcutor` 驱动协程在 IO 时挂起, 完成后恢复和继续执行。
 
-- `asynclib.eventQueue.eventQueue` 是一个线程安全的阻塞队列实例的包装.
-- `asynclib.eventloop.loop` 是主线程的事件循环入口，开发者需要在合适的位置 (例如主调用栈的同步过程结束后) 调用, 从而开始协程的调度
-- `asynclib.eventloop.__GeneratorExcutor` 是协程的驱动器, 配合 `Future` 实例对协程进行驱动,
-- `asynclib.Future.Future` 是用来辅助协程驱动器执行协程的类。它有点类似 `Promise`
-- `asynclib.asynchttp.*` 这是一个子包, 暂时仅实现了非常基本的基于 HTTP/1.0 的 GET method 的异步接口
-  - `asynclib.asynchttp.get` 基于 HTTP/1.0 的 GET method 的异步接口
+- `asynclib.core.eventQueue` 事件队列实现
+- `asynclib.core.eventloop` 事件循环、协程执行器的实现
+- `asynclib.core.model` 相关类型的实现：`Future`(异步 api 包装器)
+- `asynclib.core.api` 一些与协程相关的函数：`asyncRun`(用来向事件队列压入一个任务), `asyncfun`(一个协程装饰器, 会将一个协程委托给 asyncRun 处理)
+- `asynclib.asynchttp.api` 非阻塞 socket 实现的 HTTP 协议接口
+- `asynclib.asynchttp.model` 相关类型的实现：`Response`(http 响应报文的解析类)
 
-`asynclib` 暴露了三个接口
-
-- `loop` 事件循环入口
-- `asyncRun` 向事件队列中压入一个协程
-- `Future` 异步过程的包装器, 用于挂起协程
-  这是一个类似 Promise 的类, 该类将接收一个回调函数, 并提供一个 `resolve` 参数, 在异步过程完成时调用并传入结果, `GeneratorExcutor` 将会进一步自动驱动协程恢复并将异步过程的返回值传递到协程挂起位置
-- `asynchttp.*` 子包, 实现了基于 HTTP/1.0 的的异步接口
 
 ## todo
 
