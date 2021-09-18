@@ -1,9 +1,14 @@
 from inspect import isgenerator, isgeneratorfunction
+from enum import Enum, auto
 from .eventQueue import eventQueue
 from .model import Future
 
 
 class Loop:
+    class LoopState(Enum):
+        RUNNING = auto()
+        STOPPED = auto()
+
     class __GeneratorExecutor:
         def __init__(self, coroutine):
             self.coroutine = coroutine
@@ -25,13 +30,16 @@ class Loop:
         return cls.__single
 
     def __init__(self) -> None:
+        self.state:  Loop.LoopState = Loop.LoopState.STOPPED
         self.__stop = True
 
     def stop(self):
         self.__stop = True
+        self.state = Loop.LoopState.STOPPED
 
     def start(self):
         self.__stop = False
+        self.state = Loop.LoopState.RUNNING
 
         try:
             while True:
