@@ -41,7 +41,7 @@ def get(*, url, callback):
                 cbk()
             if __stop:
                 break
-    
+
     selector.register(sock.fileno(), EVENT_WRITE, connected)
     try:
         sock.connect(

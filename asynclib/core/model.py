@@ -9,7 +9,6 @@ class Future:
         self.value: Any = None
         self.state: str = 'pending'
         task(self.resolve)
-            
 
     def resolve(self, value: Any = None):
         if self.state == 'resolved':

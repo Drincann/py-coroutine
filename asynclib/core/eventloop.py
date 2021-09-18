@@ -43,12 +43,14 @@ class Loop:
                 elif callable(cbk):
                     cbk()
                 else:
-                    raise TypeError('cbk is not callable, generator or generatable')
+                    raise TypeError(
+                        'cbk is not callable, generator or generatable')
                 if self.__stop is True:
                     eventQueue.clear()
-                    return  
+                    return
         except KeyboardInterrupt:
             exit(0)
+
 
 def loop():
     Loop.getInstance().start()
