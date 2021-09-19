@@ -24,15 +24,13 @@ js 异步实现参考
 
 通过 `Future` 类包装异步过程, 将会辅助 `GeneratorExcutor` 驱动协程在 IO 时挂起, 完成后恢复和继续执行。
 
-- `asynclib.core.eventQueue` 事件队列实现
-- `asynclib.core.eventloop` 事件循环、协程执行器的实现
-- `asynclib.core.model` 相关类型的实现：`Future`(异步 api 包装器)
-- `asynclib.core.api` 一些与协程相关的函数：`asyncRun`(用来向事件队列压入一个任务), `asyncfun`(一个协程装饰器, 会将一个协程委托给 asyncRun 处理)
-- `asynclib.asynchttp.api` 非阻塞 socket 实现的 HTTP 协议接口
-- `asynclib.asynchttp.model` 相关类型的实现：`Response`(http 响应报文的解析类)
+- `asynclib.core.eventQueue` 低层级, 事件队列实现
+- `asynclib.core.eventloop` 低层级, 事件循环、协程执行器、事件循环 Manager 的实现
+- `asynclib.core.model` 相关类型的实现：`Future`(高层级, 异步 api 包装器)、`Emitter`(低层级, 一个事件订阅发布器)、`Coroutine`(低层级, 生成器迭代器的包装器)、`AsyncapiWrapper`(低层级, 异步 I/O 库的 api 装饰器)、`AsyncfunWrapper`(低层级, 开发者用户协程的装饰器)
+- `asynclib.asynchttp.api` 高层级, 非阻塞 socket 实现的 HTTP 协议接口
+- `asynclib.asynchttp.model` 相关类型的实现：`Response`(高层级,http 响应报文的解析类)
 
 
 ## todo
 
 - 复用 selector
-- 在没有异步任务时通知主线程结束事件循环
