@@ -1,7 +1,8 @@
-from asynclib.core import Future, asyncfun
+from asynclib.core import Future, LoopManager
 from asynclib.asynchttp import get as asyncget
 
-@asyncfun
+
+@LoopManager.asyncfun
 def http():
     responseData = yield from Future(
         lambda resolve:
@@ -10,8 +11,9 @@ def http():
                 callback=lambda response: resolve(response)
             )
     )
-    print(responseData.decode('utf-8'))
+
+    return responseData.decode()
 
 
-for i in range(1):
-    http()
+for i in range(10):
+    http().addCallback(lambda future: print(future.value))
