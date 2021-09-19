@@ -2,7 +2,7 @@ from inspect import isgeneratorfunction
 from enum import Enum, auto
 import threading
 from .eventQueue import eventQueue
-from .model import Future, AsyncapiWrapper, AsyncfunWrapper, Coroutine
+from .model import Promise, AsyncapiWrapper, AsyncfunWrapper, Coroutine
 
 
 class Loop:
@@ -13,16 +13,16 @@ class Loop:
     class __GeneratorExecutor:
         def __init__(self, coroutine: Coroutine):
             self.coroutine = coroutine
-            self.__next(Future())
+            self.__next(Promise())
 
-        def __next(self, future: Future):
-            nextFuture = None
+        def __next(self, promise: Promise):
+            nextPromise = None
             try:
-                nextFuture = self.coroutine.coro.send(future.value)
+                nextPromise = self.coroutine.coro.send(promise.value)
             except StopIteration as returnVal:
                 self.coroutine.emit('done', returnVal.value)
                 return
-            nextFuture.addCallback(self.__next)
+            nextPromise.done(self.__next)
 
     __single = None
 

@@ -1,10 +1,10 @@
-from asynclib.core import Future, LoopManager
+from asynclib.core import Promise, LoopManager
 from asynclib.asynchttp import get as asyncget
 
 
 @LoopManager.asyncfun
-def http():
-    responseData = yield from Future(
+def httpReq():
+    responseData = yield from Promise(
         lambda resolve:
             asyncget(
                 url='http://gaolihai.cool/doc/README.md',
@@ -15,5 +15,10 @@ def http():
     return responseData.decode()
 
 
-for i in range(10):
-    http().addCallback(lambda future: print(future.value))
+@LoopManager.asyncfun
+def asyncmain():
+    for i in range(10):
+        print((yield from httpReq()))
+
+
+asyncmain()

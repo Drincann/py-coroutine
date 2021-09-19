@@ -1,1 +1,1 @@
-from .core import Future, LoopManager
+from .core import Promise, LoopManager

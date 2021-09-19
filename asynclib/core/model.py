@@ -20,7 +20,7 @@ class Emitter:
         return self
 
 
-class Future:
+class Promise:
 
     def __init__(self, task=lambda resolve: resolve()):
         self.callbacks: List[Callable[[Any], Any]] = []
@@ -37,7 +37,7 @@ class Future:
             cbk(self)
         return self
 
-    def addCallback(self, cbk: Callable[[Any], Any]):
+    def done(self, cbk: Callable[[Any], Any]):
         if self.state == 'resolved':
             cbk(self)
         self.callbacks.append(cbk)
@@ -86,7 +86,7 @@ class AsyncfunWrapper(Emitter):
         self.emit('start', self)
         coro = Coroutine(self.asyncfun(*args, **kwds))
         eventQueue.pushCallback(coro)
-        return Future(
+        return Promise(
             lambda resolve:
             (coro.on('done', lambda result: resolve(result)),
              coro.on('done', self.__done))
