@@ -3,9 +3,11 @@ import urllib.parse
 from selectors import DefaultSelector, EVENT_WRITE, EVENT_READ
 from threading import Thread
 from ..core.eventQueue import eventQueue
+from ..core.eventloop import LoopManager
 
 
-def get(*, url, callback):
+@LoopManager.asyncapi
+def get(*, url, callback, asyncDone):
     urlObj = urllib.parse.urlparse(url)
     selector = DefaultSelector()
     sock = socket.socket()
@@ -28,7 +30,8 @@ def get(*, url, callback):
             responseData += chunk
         else:
             selector.unregister(sock.fileno())
-            eventQueue.pushCallback(lambda: callback(responseData))
+            eventQueue.pushCallback(
+                lambda: (callback(responseData), asyncDone(responseData)))
             nonlocal __stop
             __stop = True
     __stop = False
