@@ -12,15 +12,15 @@ class Loop:
 
     class __GeneratorExecutor:
         def __init__(self, coroutine: Coroutine):
-            self.coroutine = coroutine
-            self.__next(Promise())
+            self.__coroutine = coroutine
+            self.__next(None)
 
-        def __next(self, promise: Promise):
-            nextPromise = None
+        def __next(self, currentValue):
+            nextPromise: Promise = None
             try:
-                nextPromise = self.coroutine.coro.send(promise.value)
+                nextPromise = self.__coroutine.coro.send(currentValue)
             except StopIteration as returnVal:
-                self.coroutine.emit('done', returnVal.value)
+                self.__coroutine.emit('done', returnVal.value)
                 return
             nextPromise.done(self.__next)
 
@@ -33,20 +33,20 @@ class Loop:
         return cls.__single
 
     def __init__(self) -> None:
-        self.state:  Loop.LoopState = Loop.LoopState.STOPPED
+        self.__state:  Loop.LoopState = Loop.LoopState.STOPPED
         self.__stop = True
 
     def stop(self):
-        if self.state == Loop.LoopState.STOPPED:
+        if self.__state == Loop.LoopState.STOPPED:
             return
         self.__stop = True
-        self.state = Loop.LoopState.STOPPED
+        self.__state = Loop.LoopState.STOPPED
 
     def start(self):
-        if self.state == Loop.LoopState.RUNNING:
+        if self.__state == Loop.LoopState.RUNNING:
             return
         self.__stop = False
-        self.state = Loop.LoopState.RUNNING
+        self.__state = Loop.LoopState.RUNNING
 
         try:
             while True:
@@ -65,54 +65,54 @@ class Loop:
 
 
 class LoopManager:
-    asyncTaskCount = 0
-    loopobj = Loop.getInstance()
+    __asyncTaskCount = 0
+    __loopobj = Loop.getInstance()
 
     @classmethod
-    def loop(cls):
+    def __loop(cls):
         threading.Thread(target=Loop.getInstance().start).start()
 
     @classmethod
-    def stopLoop(cls):
-        cls.loopobj.stop()
+    def __stopLoop(cls):
+        cls.__loopobj.stop()
 
     @classmethod
-    def asyncStart(cls):
-        cls.asyncTaskCount += 1
-        if cls.asyncTaskCount == 1:
-            cls.loop()
+    def __asyncStart(cls):
+        cls.__asyncTaskCount += 1
+        if cls.__asyncTaskCount == 1:
+            cls.__loop()
 
     @classmethod
-    def asyncDone(cls):
-        cls.asyncTaskCount -= 1
-        if cls.asyncTaskCount == 0:
-            cls.stopLoop()
+    def __asyncDone(cls):
+        cls.__asyncTaskCount -= 1
+        if cls.__asyncTaskCount == 0:
+            cls.__stopLoop()
 
     @classmethod
-    def asyncapiStart(cls, asyncapiWrapped):
-        cls.asyncStart()
+    def __asyncapiStart(cls, asyncapiWrapped):
+        cls.__asyncStart()
 
     @classmethod
-    def asyncapiDone(cls, asyncapiWrapped):
-        cls.asyncDone()
+    def __asyncapiDone(cls, asyncapiWrapped):
+        cls.__asyncDone()
 
     @classmethod
-    def asyncfunStart(cls, asyncfunWrapped):
-        cls.asyncStart()
+    def __asyncfunStart(cls, asyncfunWrapped):
+        cls.__asyncStart()
 
     @classmethod
-    def asyncfunDone(cls, asyncfunWrapped):
-        cls.asyncDone()
+    def __asyncfunDone(cls, asyncfunWrapped):
+        cls.__asyncDone()
 
     # async api 的装饰器，用于维护所有异步任务的状态，管理事件循环
     # 只需要额外接收一个关键字参数 asyncTaskDone 即可实现一个对接到事件循环中的 async api
     @classmethod
     def asyncapi(cls, fun):
-        return AsyncapiWrapper(fun).on('start', cls.asyncapiStart).on('done', cls.asyncapiDone)
+        return AsyncapiWrapper(fun).on('start', cls.__asyncapiStart).on('done', cls.__asyncapiDone)
 
     @classmethod
     def asyncfun(cls, coro):
         if not isgeneratorfunction(coro):
             raise TypeError('coro is not a generator function')
 
-        return AsyncfunWrapper(coro).on('start', cls.asyncfunStart).on('done', cls.asyncfunDone)
+        return AsyncfunWrapper(coro).on('start', cls.__asyncfunStart).on('done', cls.__asyncfunDone)
