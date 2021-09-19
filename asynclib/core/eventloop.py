@@ -53,7 +53,7 @@ class Loop:
                 else:
                     raise TypeError(
                         'cbk is not callable, generator or generatable')
-                if self.__stop is True:
+                if self.__stop is True and eventQueue.isEmpty():
                     eventQueue.clear()
                     return
         except KeyboardInterrupt:

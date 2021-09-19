@@ -9,6 +9,9 @@ class __EventQueue:
         while self.__eventQueue.empty() is not True:
             self.__eventQueue.get()
 
+    def isEmpty(self) -> bool:
+        return self.__eventQueue.empty()
+
     def pushCallback(self, fn):
         self.__eventQueue.put(fn, block=True)
 
