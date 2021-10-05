@@ -1,6 +1,9 @@
 from inspect import isgeneratorfunction
 from enum import Enum, auto
+from selectors import DefaultSelector
 import threading
+import time
+from typing import IO
 from .eventQueue import eventQueue
 from .model import Promise, AsyncapiWrapper, AsyncfunWrapper, Coroutine
 
@@ -35,6 +38,7 @@ class Loop:
     def __init__(self) -> None:
         self.__state:  Loop.LoopState = Loop.LoopState.STOPPED
         self.__stop = True
+        self.selector = DefaultSelector()
 
     def stop(self):
         if self.__state == Loop.LoopState.STOPPED:
@@ -42,22 +46,35 @@ class Loop:
         self.__stop = True
         self.__state = Loop.LoopState.STOPPED
 
+    def __execTask(self, cbk):
+        if isinstance(cbk, Coroutine):
+            self.__GeneratorExecutor(cbk)
+        elif callable(cbk):
+            cbk()
+        else:
+            raise TypeError(
+                'cbk is not callable, generator or generatable')
+
     def start(self):
         if self.__state == Loop.LoopState.RUNNING:
             return
         self.__stop = False
         self.__state = Loop.LoopState.RUNNING
-
+        iotime = 0.1
+        start = time.time()
         try:
             while True:
-                cbk = eventQueue.getCallback()
-                if isinstance(cbk, Coroutine):
-                    self.__GeneratorExecutor(cbk)
-                elif callable(cbk):
-                    cbk()
-                else:
-                    raise TypeError(
-                        'cbk is not callable, generator or generatable')
+                cbk = eventQueue.getCallback(block=False)
+                if cbk:
+                    self.__execTask(cbk)
+                events = self.selector.select(timeout=iotime)
+
+                if len(events) != 0:
+                    iotime = time.time() - start
+                    for event_key, _ in events:
+                        self.__execTask(event_key.data)
+                    start = time.time()
+
                 if self.__stop:
                     return
         except KeyboardInterrupt:

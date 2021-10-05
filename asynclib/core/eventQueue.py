@@ -15,8 +15,11 @@ class __EventQueue:
     def pushCallback(self, fn):
         self.__eventQueue.put(fn, block=True)
 
-    def getCallback(self):
-        return self.__eventQueue.get(block=True)
+    def getCallback(self, *, block=True):
+        try:
+            return self.__eventQueue.get(block)
+        except:
+            return None
 
 
 eventQueue = __EventQueue()
