@@ -29,8 +29,3 @@ js 异步实现参考
 - `asynclib.core.model` 相关类型的实现：`Promise`(高层级, 异步 api 包装器)、`Emitter`(低层级, 一个事件订阅发布器)、`Coroutine`(低层级, 生成器迭代器的包装器)、`AsyncapiWrapper`(低层级, 异步 I/O 库的 api 装饰器)、`AsyncfunWrapper`(低层级, 开发者用户协程的装饰器)
 - `asynclib.asynchttp.api` 高层级, 非阻塞 socket 实现的 HTTP 协议接口
 - `asynclib.asynchttp.model` 相关类型的实现：`Response`(高层级,http 响应报文的解析类)
-
-
-## todo
-
-- 复用 selector

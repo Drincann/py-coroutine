@@ -1,15 +1,15 @@
 import socket
 import urllib.parse
-from selectors import DefaultSelector, EVENT_WRITE, EVENT_READ
+from selectors import EVENT_WRITE, EVENT_READ
 from threading import Thread
 from ..core.eventQueue import eventQueue
-from ..core.eventloop import LoopManager
+from ..core.eventloop import Loop, LoopManager
 
 
 @LoopManager.asyncapi
 def get(*, url, callback, asyncDone):
     urlObj = urllib.parse.urlparse(url)
-    selector = DefaultSelector()
+    selector = Loop.getInstance().selector
     sock = socket.socket()
     sock.setblocking(False)
 
@@ -36,15 +36,6 @@ def get(*, url, callback, asyncDone):
             __stop = True
     __stop = False
 
-    def loop():
-        while True:
-            events = selector.select()
-            for event_key, event_mask in events:
-                cbk = event_key.data
-                cbk()
-            if __stop:
-                break
-
     selector.register(sock.fileno(), EVENT_WRITE, connected)
     try:
         sock.connect(
@@ -52,4 +43,3 @@ def get(*, url, callback, asyncDone):
         )
     except BlockingIOError:
         pass
-    Thread(target=loop).start()
