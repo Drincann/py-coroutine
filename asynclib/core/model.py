@@ -64,10 +64,14 @@ class AsyncapiWrapper(Emitter):
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         self.emit('start', self)
-        self.__asyncapi(
-            *args,
-            **kwds,
-            asyncDone=self.__done
+        eventQueue.pushCallback(
+            lambda:
+            self.__asyncapi(
+                *args,
+                **kwds,
+                # 从该层分发异步结果
+                asyncDone=self.__done
+            )
         )
 
     def __done(self, result):
@@ -87,9 +91,12 @@ class AsyncfunWrapper(Emitter):
         coro = Coroutine(self.__asyncfun(*args, **kwds))
         eventQueue.pushCallback(coro)
         return Promise(
-            lambda resolve:
-            (coro.on('done', lambda result: resolve(result)),
-             coro.on('done', self.__done))
+            lambda resolve: (
+                # 从事件循环层接收异步结果 resolve 给开发者用户
+                coro.on('done', lambda result: resolve(result)),
+                # 从该层分发异步结果
+                coro.on('done', self.__done)
+            )
         )
 
     def __done(self, result):
