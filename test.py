@@ -1,3 +1,4 @@
+import time
 from asynclib.core import Promise, LoopManager
 from asynclib.asynchttp import get as asyncget
 
@@ -11,14 +12,19 @@ def httpReq():
                 callback=lambda response: resolve(response)
             )
     )
-
     return responseData.decode()
 
 
 @LoopManager.asyncfun
 def asyncmain():
-    for i in range(10):
-        print((yield from httpReq()))
+    start = time.time()
+    yield from Promise.all([httpReq() for _ in range(10)])
+    print(time.time() - start)
+
+    start = time.time()
+    for _ in range(10):
+        yield from httpReq()
+    print(time.time() - start)
 
 
 asyncmain()
