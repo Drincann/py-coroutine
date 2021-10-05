@@ -1,4 +1,5 @@
-from typing import Any, Callable, List
+from inspect import isgenerator
+from typing import Any, Callable, Iterable, List
 from .eventQueue import eventQueue
 
 
@@ -21,12 +22,12 @@ class Emitter:
 
 
 class Promise:
-
     def __init__(self, task=lambda resolve: resolve()):
         self.__callbacks: List[Callable[[Any], Any]] = []
         self.__value: Any = None
         self.__state: str = 'pending'
-        task(self.resolve)
+        self.__task = task(self.resolve)
+        pass
 
     def resolve(self, value: Any = None):
         if self.__state == 'resolved':
@@ -44,6 +45,8 @@ class Promise:
         return self
 
     def __iter__(self):
+        if isgenerator(self.__task):
+            yield from self.__task
         yield self
         return self.__value
 
