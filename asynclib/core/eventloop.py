@@ -3,7 +3,6 @@ from enum import Enum, auto
 from selectors import DefaultSelector
 import threading
 import time
-from typing import IO
 from .eventQueue import eventQueue
 from .model import Promise, AsyncapiWrapper, AsyncfunWrapper, Coroutine
 

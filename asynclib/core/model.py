@@ -50,6 +50,15 @@ class Promise:
         yield self
         return self.__value
 
+    @classmethod
+    def all(cls, tasks: list):
+        def waitAll(resolve):
+            for idx in range(len(tasks)):
+                if isinstance(tasks[idx], Promise):
+                    tasks[idx] = yield from tasks[idx]
+            resolve(tasks)
+        return Promise(waitAll)
+
 
 # 底层接口, 用户开发者的协程将被该类包装, 执行结束后被执行器触发 done 事件回调
 class Coroutine(Emitter):
