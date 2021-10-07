@@ -66,8 +66,16 @@ class Loop:
                 while cbk := eventQueue.getCallback(block=False):
                     if cbk:
                         self.__execTask(cbk)
-                events = self.selector.select(timeout=iotime)
-
+                try:
+                    events = self.selector.select(timeout=iotime)
+                except:
+                    """
+                    FIXME
+                    win 下 selector 在最后一个 I/O 任务结束时抛出:
+                    'OSError: [WinError 10022] 提供了一个无效的参数。'
+                    linux 下无问题
+                    """
+                    events = tuple()
                 if len(events) != 0:
                     iotime = time.time() - start
                     for event_key, _ in events:
