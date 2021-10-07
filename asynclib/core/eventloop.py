@@ -63,9 +63,9 @@ class Loop:
         start = time.time()
         try:
             while True:
-                cbk = eventQueue.getCallback(block=False)
-                if cbk:
-                    self.__execTask(cbk)
+                while cbk := eventQueue.getCallback(block=False):
+                    if cbk:
+                        self.__execTask(cbk)
                 events = self.selector.select(timeout=iotime)
 
                 if len(events) != 0:
