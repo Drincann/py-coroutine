@@ -26,10 +26,10 @@ class Promise:
         self.__callbacks: List[Callable[[Any], Any]] = []
         self.__value: Any = None
         self.__state: str = 'pending'
-        self.__task = task(self.resolve)
+        self.__task = task(self.__resolve)
         pass
 
-    def resolve(self, value: Any = None):
+    def __resolve(self, value: Any = None):
         if self.__state == 'resolved':
             return
         self.__value = value
