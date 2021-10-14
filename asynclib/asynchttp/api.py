@@ -4,6 +4,7 @@ from selectors import EVENT_WRITE, EVENT_READ
 from threading import Thread
 from ..core.eventQueue import eventQueue
 from ..core.eventloop import Loop, LoopManager
+from .model import Response
 
 
 @LoopManager.asyncapi
@@ -30,8 +31,9 @@ def get(*, url, callback, asyncDone):
             responseData += chunk
         else:
             selector.unregister(sock.fileno())
+            responseObj = Response(responseData.decode())
             eventQueue.pushCallback(
-                lambda: (callback(responseData), asyncDone(responseData)))
+                lambda: (callback(responseObj), asyncDone(responseObj)))
             nonlocal __stop
             __stop = True
     __stop = False

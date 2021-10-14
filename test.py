@@ -12,18 +12,18 @@ def httpReq():
                 callback=lambda response: resolve(response)
             )
     )
-    return responseData.decode()
+    return responseData
 
 
 @LoopManager.asyncfun
 def asyncmain():
     start = time.time()
-    yield from Promise.all([httpReq() for _ in range(10)])
+    print((yield from Promise.all([httpReq() for _ in range(10)])))
     print(time.time() - start)
 
     start = time.time()
     for _ in range(10):
-        yield from httpReq()
+        print((yield from httpReq()))
     print(time.time() - start)
 
 
