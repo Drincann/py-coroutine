@@ -63,7 +63,7 @@ class Loop:
         start = time.time()
         try:
             while True:
-                while cbk := eventQueue.getCallback(block=False):
+                while cbk := eventQueue.getCallback():
                     if cbk:
                         self.__execTask(cbk)
                 try:
