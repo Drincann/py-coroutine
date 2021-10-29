@@ -1,10 +1,9 @@
 import socket
 import urllib.parse
 from selectors import EVENT_WRITE, EVENT_READ
-from threading import Thread
 from ..core.eventloop import Loop, LoopManager
 from .model import Response
-loop = Loop.getInstance()
+from ..core.eventQueue import EventQueueManager
 
 
 @LoopManager.asyncapi
@@ -32,7 +31,7 @@ def get(*, url, callback, asyncDone):
         else:
             selector.unregister(sock.fileno())
             responseObj = Response(responseData.decode())
-            loop.getEventQueue().pushCallback(
+            EventQueueManager.getNextEventQueue().pushCallback(
                 lambda: (callback(responseObj), asyncDone(responseObj)))
             nonlocal __stop
             __stop = True

@@ -3,8 +3,8 @@ from enum import Enum, auto
 from selectors import DefaultSelector
 import threading
 import time
-from typing import Any
-from .model import Promise, Coroutine, Emitter
+from .model import Promise, Coroutine, AsyncapiWrapper, AsyncfunWrapper
+from .eventQueue import EventQueueManager
 
 
 class Loop:
@@ -34,23 +34,9 @@ class Loop:
         return cls.__single
 
     def __init__(self) -> None:
-        from .eventQueue import EventQueue
-
         self.__state:  Loop.LoopState = Loop.LoopState.STOPPED
         self.__stop = True
         self.selector = DefaultSelector()
-        self.__eventQueueRLock = threading.RLock()
-        self.__currentEventQueue = EventQueue()
-        self.__nextEventQueue = EventQueue()
-
-    def getEventQueue(self):
-        return self.__nextEventQueue
-
-    def swapEventQueue(self):
-        self.__eventQueueRLock.acquire()
-        self.__currentEventQueue, self.__nextEventQueue = \
-            self.__nextEventQueue, self.__currentEventQueue
-        self.__eventQueueRLock.release()
 
     def stop(self):
         if self.__state == Loop.LoopState.STOPPED:
@@ -77,11 +63,11 @@ class Loop:
         start = time.time()
         try:
             while True:
-                eventQueue = self.__currentEventQueue
+                eventQueue = EventQueueManager.getCurrentEventQueue()
                 while cbk := eventQueue.getCallback():
                     if cbk:
                         self.__execTask(cbk)
-                self.swapEventQueue()
+                EventQueueManager.swapEventQueues()
 
                 try:
                     events = self.selector.select(timeout=iotime)
@@ -160,52 +146,3 @@ class LoopManager:
             raise TypeError('coro is not a generator function')
 
         return AsyncfunWrapper(coro).on('start', cls.__asyncfunStart).on('done', cls.__asyncfunDone)
-
-
-# async api 抽象层, 位于事件循环和 async api 之间
-class AsyncapiWrapper(Emitter):
-    def __init__(self, asyncapi) -> None:
-        super().__init__()
-        self.__asyncapi = asyncapi
-        self.result = None
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        self.emit('start', self)
-        Loop.getInstance().getEventQueue().pushCallback(
-            lambda:
-            self.__asyncapi(
-                *args,
-                **kwds,
-                # 从该层分发异步结果
-                asyncDone=self.__done
-            )
-        )
-
-    def __done(self, result=None):
-        self.result = result
-        self.emit('done', self)
-
-
-# 这是一个可执行的开发者用户的协程抽象层, 位于事件循环和协程包装(Coroutine)之间
-class AsyncfunWrapper(Emitter):
-    def __init__(self, asyncfun) -> None:
-        super().__init__()
-        self.__asyncfun = asyncfun
-        self.result = None
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        self.emit('start', self)
-        coro = Coroutine(self.__asyncfun(*args, **kwds))
-        Loop.getInstance().getEventQueue().pushCallback(coro)
-        return Promise(
-            lambda resolve: (
-                # 从事件循环层接收异步结果 resolve 给开发者用户
-                coro.on('done', lambda result: resolve(result)),
-                # 从该层分发异步结果
-                coro.on('done', self.__done)
-            )
-        )
-
-    def __done(self, result):
-        self.result = result
-        self.emit('done', self)

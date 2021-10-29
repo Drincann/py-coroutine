@@ -1,7 +1,9 @@
 import time
 from typing import Any, Callable
-from .eventloop import AsyncapiWrapper, Loop, LoopManager
-loop = Loop.getInstance()
+
+from asynclib.core.model import Promise
+from .eventloop import LoopManager
+from .eventQueue import EventQueueManager
 
 
 class Timer:
@@ -12,19 +14,25 @@ class Timer:
         self.start = time.time()
         self.callback = callback
         self.asyncDone = asyncDone
-        # self.init(self)
 
     @staticmethod
     @LoopManager.asyncapi
     def setTimeout(timeout: float, callback: Callable, asyncDone: Callable) -> None:
-        loop.getEventQueue().pushCallback(Timer(timeout / 1000, callback, asyncDone))
+        EventQueueManager \
+            .getNextEventQueue().pushCallback(
+                Timer(timeout / 1000, callback, asyncDone)
+            )
+
+    @staticmethod
+    def sleep(ms) -> None:
+        return Promise(lambda resolve: Timer.setTimeout(ms, resolve))
 
     def __call__(self) -> Any:
         if time.time() - self.start > self.timeout:
-            loop.getEventQueue().pushCallback(self.callback)
-            loop.getEventQueue().pushCallback(self.asyncDone)
+            EventQueueManager.getCurrentEventQueue().pushHeadCallback(self.callback)
+            EventQueueManager.getCurrentEventQueue().pushHeadCallback(self.asyncDone)
         else:
-            loop.getEventQueue().pushCallback(self)
+            EventQueueManager.getNextEventQueue().pushCallback(self)
         pass
 
     def __repr__(self) -> str:
@@ -33,4 +41,6 @@ class Timer:
 
 @LoopManager.asyncapi
 def setTimeout(ms, callback, asyncDone):
-    loop.getEventQueue().pushCallback(Timer(ms / 1000, callback, asyncDone))
+    EventQueueManager.getEventQueue().pushCallback(
+        Timer(ms / 1000, callback, asyncDone)
+    )

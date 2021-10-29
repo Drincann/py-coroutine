@@ -2,7 +2,7 @@ from collections import deque
 import threading
 
 
-class EventQueue:
+class _EventQueue:
     def __init__(self) -> None:
         self.__deque = deque()
         self.__rlock = threading.RLock()
@@ -45,3 +45,34 @@ class EventQueue:
             return None
         finally:
             self.__rlock.release()
+
+
+class EventQueueManager:
+    __eventQueueRLock = threading.RLock()
+    __currentEventQueue = _EventQueue()
+    __nextEventQueue = _EventQueue()
+
+    @staticmethod
+    def getCurrentEventQueue():
+        EventQueueManager.__eventQueueRLock.acquire()
+        try:
+            return EventQueueManager.__currentEventQueue
+        finally:
+            EventQueueManager.__eventQueueRLock.release()
+
+    @staticmethod
+    def getNextEventQueue():
+        EventQueueManager.__eventQueueRLock.acquire()
+        try:
+            return EventQueueManager.__nextEventQueue
+        finally:
+            EventQueueManager.__eventQueueRLock.release()
+
+    @staticmethod
+    def swapEventQueues():
+        EventQueueManager.__eventQueueRLock.acquire()
+        try:
+            EventQueueManager.__currentEventQueue, EventQueueManager.__nextEventQueue = \
+                EventQueueManager.__nextEventQueue, EventQueueManager.__currentEventQueue
+        finally:
+            EventQueueManager.__eventQueueRLock.release()
