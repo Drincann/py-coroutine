@@ -2,7 +2,7 @@ from collections import deque
 import threading
 
 
-class __EventQueue:
+class EventQueue:
     def __init__(self) -> None:
         self.__deque = deque()
         self.__rlock = threading.RLock()
@@ -26,25 +26,22 @@ class __EventQueue:
     def getCallback(self):
         self.__rlock.acquire()
         try:
-            return self.__deque.pop()
-        except:
-            return None
-        finally:
-            self.__rlock.release()
-
-    def pushleftCallback(self, fn):
-        self.__rlock.acquire()
-        self.__deque.appendleft(fn)
-        self.__rlock.release()
-
-    def getleftCallback(self):
-        self.__rlock.acquire()
-        try:
             return self.__deque.popleft()
         except:
             return None
         finally:
             self.__rlock.release()
 
+    def pushHeadCallback(self, fn):
+        self.__rlock.acquire()
+        self.__deque.appendleft(fn)
+        self.__rlock.release()
 
-eventQueue = __EventQueue()
+    def getTailCallback(self):
+        self.__rlock.acquire()
+        try:
+            return self.__deque.pop()
+        except:
+            return None
+        finally:
+            self.__rlock.release()
