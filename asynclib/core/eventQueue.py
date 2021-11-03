@@ -22,6 +22,7 @@ class _EventQueue:
         self.__rlock.acquire()
         self.__deque.append(fn)
         self.__rlock.release()
+        return self
 
     def getCallback(self):
         self.__rlock.acquire()
@@ -36,6 +37,7 @@ class _EventQueue:
         self.__rlock.acquire()
         self.__deque.appendleft(fn)
         self.__rlock.release()
+        return self
 
     def getTailCallback(self):
         self.__rlock.acquire()

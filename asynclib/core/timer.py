@@ -27,10 +27,14 @@ class Timer:
     def sleep(ms) -> None:
         return Promise(lambda resolve: Timer.setTimeout(ms, resolve))
 
+    # 调用的语义为：检查是否超时
+    # 超时则向当前事件队列头插回调（高优先，防止误差过大）
+    # 否则将实例插入下一个事件队列尾
     def __call__(self) -> Any:
         if time.time() - self.start > self.timeout:
-            EventQueueManager.getCurrentEventQueue().pushHeadCallback(self.callback)
-            EventQueueManager.getCurrentEventQueue().pushHeadCallback(self.asyncDone)
+            EventQueueManager.getCurrentEventQueue() \
+                             .pushHeadCallback(self.callback) \
+                             .pushHeadCallback(self.asyncDone)
         else:
             EventQueueManager.getNextEventQueue().pushCallback(self)
         pass
