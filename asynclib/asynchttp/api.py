@@ -31,7 +31,7 @@ def get(*, url, callback, asyncDone):
         else:
             selector.unregister(sock.fileno())
             responseObj = Response(responseData.decode())
-            EventQueueManager.getNextEventQueue().pushCallback(
+            EventQueueManager.getCurrentEventQueue().pushCallback(
                 lambda: (callback(responseObj), asyncDone(responseObj)))
             nonlocal __stop
             __stop = True
