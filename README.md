@@ -2,7 +2,7 @@
 
 一个小目标，Python 基于生成器的协程实现，带有简单的事件循环、以及可能的 Promise 实现。
 
-同时提供一套 socket 异步 api，以及可能的其他异步 api。
+同时提供异步计时器(timer)、一套 socket 异步 api，以及可能的其他异步 api。
 
 ## 参考资料
 
@@ -24,8 +24,29 @@ js 异步实现参考
 
 通过 `Promise` 类包装异步过程, 将会辅助 `GeneratorExcutor` 驱动协程在 IO 时挂起, 完成后恢复和继续执行。
 
-- `asynclib.core.eventQueue` 低层级, 事件队列实现
-- `asynclib.core.eventloop` 低层级, 事件循环、协程执行器、事件循环 Manager 的实现, 在事件循环中, 若事件队列中有任务则执行任务，若没有任务则等待 I/O, 超时时间为最近一次 I/O 事件发生的间隔
-- `asynclib.core.model` 相关类型的实现：`Promise`(高层级, 异步 api 包装器)、`Emitter`(低层级, 一个事件订阅发布器)、`Coroutine`(低层级, 生成器迭代器的包装器)、`AsyncapiWrapper`(低层级, 异步 I/O 库的 api 装饰器)、`AsyncfunWrapper`(低层级, 开发者用户协程的装饰器)
+- `asynclib.core.eventQueue` 低层级, 事件队列实现:
+  - class `_EventQueue`: 低层级, 事件队列实现
+  - class `EventQueueManager`: 低层级抽象层, 事件队列单例的管理器
+- `asynclib.core.eventloop` 低层级, 事件循环、协程执行器、事件循环 Manager 的实现
+  
+  在事件循环中, 每次首先检查 timer 最小堆, 执行已经超时的任务。
+  
+  然后检查事件队列, 执行所有事件。
+  
+  最后等待 I/O, 超时时间为即将发生的 timer 到现在的时间间隔，如果没有 timer, 则阻塞时间为 2^31 - 1。
+  - class `Loop`: 低层级, 事件循环的实现
+  - class `LoopManager`: 高层级, 用于管理事件循环单例的执行, 负责所有协程和异步任务的计数, 以及想外暴露协程函数和异步 api 的装饰器
+- `asynclib.core.model` 相关类型的实现：
+  - class `Promise`: 高层级, 异步 api 包装器
+  - class `Emitter`: 低层级, 一个事件订阅发布器
+  - class `Coroutine`: 低层级, 生成器迭代器的包装器
+  - class `AsyncapiWrapper`: 低层级, 异步 I/O 库的 api 装饰器
+  - class `AsyncfunWrapper`: 低层级, 开发者用户协程的装饰器
+  - class `MinHeap`: 通用的最小堆实现
+- `asynclib.core.timer` 异步计时器实现:
+  - class `TimerHeap`: timer 最小堆
+  - class `Timer`: timer 的实现
 - `asynclib.asynchttp.api` 高层级, 非阻塞 socket 实现的 HTTP 协议接口
-- `asynclib.asynchttp.model` 相关类型的实现：`Response`(高层级,http 响应报文的解析类)
+  - method `get`: 异步 HTTP GET 请求实现
+- `asynclib.asynchttp.model` 相关类型的实现
+  - class `Response`: 高层级,http 响应报文的解析类
