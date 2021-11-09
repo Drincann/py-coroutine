@@ -52,29 +52,11 @@ class _EventQueue:
 class EventQueueManager:
     __eventQueueRLock = threading.RLock()
     __currentEventQueue = _EventQueue()
-    __nextEventQueue = _EventQueue()
 
     @staticmethod
     def getCurrentEventQueue():
         EventQueueManager.__eventQueueRLock.acquire()
         try:
             return EventQueueManager.__currentEventQueue
-        finally:
-            EventQueueManager.__eventQueueRLock.release()
-
-    @staticmethod
-    def getNextEventQueue():
-        EventQueueManager.__eventQueueRLock.acquire()
-        try:
-            return EventQueueManager.__nextEventQueue
-        finally:
-            EventQueueManager.__eventQueueRLock.release()
-
-    @staticmethod
-    def swapEventQueues():
-        EventQueueManager.__eventQueueRLock.acquire()
-        try:
-            EventQueueManager.__currentEventQueue, EventQueueManager.__nextEventQueue = \
-                EventQueueManager.__nextEventQueue, EventQueueManager.__currentEventQueue
         finally:
             EventQueueManager.__eventQueueRLock.release()
