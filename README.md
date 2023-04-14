@@ -35,7 +35,7 @@ js 异步实现参考
   
   最后等待 I/O, 超时时间为即将发生的 timer 到现在的时间间隔，如果没有 timer, 则阻塞时间为 2^31 - 1。
   - class `Loop`: 低层级, 事件循环的实现
-  - class `LoopManager`: 高层级, 用于管理事件循环单例的执行, 负责所有协程和异步任务的计数, 以及想外暴露协程函数和异步 api 的装饰器
+  - class `LoopManager`: 高层级, 用于管理事件循环单例的执行, 负责所有协程和异步任务的计数, 以及向外暴露协程函数和异步 api 的装饰器
 - `asynclib.core.model` 相关类型的实现：
   - class `Promise`: 高层级, 异步 api 包装器
   - class `Emitter`: 低层级, 一个事件订阅发布器
