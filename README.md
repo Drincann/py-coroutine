@@ -41,7 +41,7 @@ js 异步实现参考
   - class `Emitter`: 低层级, 一个事件订阅发布器
   - class `Coroutine`: 低层级, 生成器迭代器的包装器
   - class `AsyncapiWrapper`: 低层级, 异步 I/O 库的 api 装饰器
-  - class `AsyncfunWrapper`: 低层级, 开发者用户协程的装饰器
+  - class `AsyncfunWrapper`: 低层级, 协程函数的装饰器
   - class `MinHeap`: 通用的最小堆实现
 - `asynclib.core.timer` 异步计时器实现:
   - class `TimerHeap`: timer 最小堆
@@ -49,4 +49,4 @@ js 异步实现参考
 - `asynclib.asynchttp.api` 高层级, 非阻塞 socket 实现的 HTTP 协议接口
   - method `get`: 异步 HTTP GET 请求实现
 - `asynclib.asynchttp.model` 相关类型的实现
-  - class `Response`: 高层级,http 响应报文的解析类
+  - class `Response`: 高层级, http 响应报文的解析类 @BBQ293
