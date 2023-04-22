@@ -21,6 +21,10 @@ Contains coroutine-level timer, and a simple non-blocking socket implementation 
 
   <https://www.promisejs.org/implementing/>
 
+- async function in v8
+
+  <https://v8.dev/blog/fast-async>
+
 - book: Operating System: The Three Easy Pieces
 
   <http://pages.cs.wisc.edu/~remzi/OSTEP/>
