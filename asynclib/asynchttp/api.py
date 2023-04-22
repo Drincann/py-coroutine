@@ -2,7 +2,7 @@ import socket
 import urllib.parse
 from selectors import EVENT_WRITE, EVENT_READ
 from ..core.eventloop import Loop, LoopManager
-from .model import Response
+from .response import HttpResponse
 from ..core.eventQueue import EventQueueManager
 
 
@@ -17,7 +17,8 @@ def get(*, url, callback, asyncDone):
         selector.unregister(sock.fileno())
         selector.register(sock.fileno(), EVENT_READ, responded)
         sock.send(
-            f"""GET {urlObj.path if urlObj.path != '' else '/'}{'?' if urlObj.query != '' else '' + urlObj.query} HTTP/1.0\r\n\r\n"""
+            (f"""GET {urlObj.path if urlObj.path != '' else '/'}{'?' if urlObj.query != '' else '' + urlObj.query} HTTP/1.0\r\n""" +
+             f"""Host: {urlObj.hostname}\r\n\r\n""")
             .encode('ascii')
         )
 
@@ -30,7 +31,7 @@ def get(*, url, callback, asyncDone):
             responseData += chunk
         else:
             selector.unregister(sock.fileno())
-            responseObj = Response(responseData.decode())
+            responseObj = HttpResponse(responseData.decode())
             EventQueueManager.getCurrentEventQueue().pushCallback(
                 lambda: (callback(responseObj), asyncDone(responseObj)))
             nonlocal __stop

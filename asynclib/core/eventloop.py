@@ -4,10 +4,19 @@ from selectors import DefaultSelector
 import threading
 import time
 
-from .model import Promise, Coroutine, AsyncapiWrapper, AsyncfunWrapper
+from .wrappers import Coroutine, AsyncapiWrapper, AsyncfunWrapper
+from .promise import Promise
 from .eventQueue import EventQueueManager
 
 MAX_TIMEOUT = 2**31-1
+
+"""
+Event loop contains the following stages
+
+- check timer heap
+- check event queue
+- IO waiting / waiting timer if no IO task
+"""
 
 
 class Loop:
@@ -21,13 +30,16 @@ class Loop:
             self.__next(None)
 
         def __next(self, currentValue):
-            nextPromise: Promise = None
+            nextPromiseOrValue = None
             try:
-                nextPromise = self.__coroutine.coro.send(currentValue)
+                nextPromiseOrValue = self.__coroutine.coro.send(currentValue)
             except StopIteration as returnVal:
                 self.__coroutine.emit('done', returnVal.value)
                 return
-            nextPromise.done(self.__next)
+            if isinstance(nextPromiseOrValue, Promise):
+                nextPromiseOrValue.then(self.__next)
+            else:
+                __next(nextPromiseOrValue)
     __single = None
 
     @classmethod
@@ -65,9 +77,11 @@ class Loop:
         timerHeap = TimerHeap.getInstance()
         try:
             while True:
+                # check timer heap
                 while (timer := timerHeap.peekTimer()) is not None and timer.isTimeout():
                     self.__execTask(timerHeap.popTimer().getCallback())
 
+                # check event queue
                 eventQueue = EventQueueManager.getCurrentEventQueue()
                 while cbk := eventQueue.getCallback():
                     if cbk:
@@ -76,7 +90,11 @@ class Loop:
                         self.__execTask(cbk)
                 if self.__stop:
                     return
+
+                # IO
+                events = tuple()
                 try:
+                    # waiting timer if no IO task
                     recentTimer = timerHeap.peekTimer()
                     timeout = recentTimer.end - time.time() if recentTimer is not None else MAX_TIMEOUT
 
@@ -85,8 +103,8 @@ class Loop:
                             time.sleep(max(timeout, 0))
                         except OverflowError:
                             pass
-                        events = tuple()
                     else:
+                        # IO waiting
                         events = self.selector.select(timeout)
                 except IOError:
                     """

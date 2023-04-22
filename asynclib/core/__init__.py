@@ -1,3 +1,3 @@
 from .eventloop import LoopManager
-from .model import Promise
+from .promise import Promise
 from .timer import Timer

@@ -1,9 +1,14 @@
 import time
 from typing import Any, Callable
 
-from asynclib.core.model import Promise, MinHeap
+from asynclib.core.util import MinHeap
+from asynclib.core.promise import Promise
 from .eventloop import LoopManager
 from .eventQueue import EventQueueManager
+
+"""
+MinHeap of Timer
+"""
 
 
 class TimerHeap:
@@ -29,6 +34,10 @@ class TimerHeap:
 
 
 _timerHeap = TimerHeap.getInstance()
+
+"""
+Coroutine-level timer abstraction
+"""
 
 
 class Timer:

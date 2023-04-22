@@ -1,6 +1,12 @@
 from collections import deque
 import threading
 
+"""
+Event queue
+
+It contains a thread-safe double-ended queue for storing callback functions of event loop.
+"""
+
 
 class _EventQueue:
     def __init__(self) -> None:
@@ -55,8 +61,4 @@ class EventQueueManager:
 
     @staticmethod
     def getCurrentEventQueue():
-        EventQueueManager.__eventQueueRLock.acquire()
-        try:
-            return EventQueueManager.__currentEventQueue
-        finally:
-            EventQueueManager.__eventQueueRLock.release()
+        return EventQueueManager.__currentEventQueue
