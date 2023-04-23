@@ -165,8 +165,8 @@ class LoopManager:
     def __asyncfunDone(cls, asyncfunWrapped):
         cls.__asyncDone()
 
-    # async api 的装饰器，用于维护所有异步任务的状态，管理事件循环
-    # 只需要额外接收一个关键字参数 asyncTaskDone 即可实现一个对接到事件循环中的 async api
+    # decorator for async api, used to maintain the state of all async tasks and manage the event loop
+    # only need to receive an extra keyword argument asyncTaskDone to implement an async api that connects to the event loop
     @classmethod
     def asyncapi(cls, fun):
         return AsyncapiWrapper(fun).on('start', cls.__asyncapiStart).on('done', cls.__asyncapiDone)
